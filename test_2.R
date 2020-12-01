@@ -1,4 +1,5 @@
 # Test code from meeting, 30/11/2020
+# Recreating the workflow based on vignette
 
 library(HaDeX)
 library(dplyr)
@@ -33,14 +34,24 @@ tmp_mass <-
   ungroup(.) %>%
   select(-File, -z, -Inten, -Center, -expMass) %>%
   unique(.) %>%
-  mutate(aggMass = round(aggMass, 5)) %>% 
+  as.data.frame()
+
+reference_table_exp_mass <- dat_tmp %>%
+  mutate(expMass = z*(Center-proton_mass)) %>%
+  group_by(Sequence, MaxUptake, MHP, Exposure, File) %>%
+  mutate(avg_exp_mass = weighted.mean(expMass, Inten, na.rm = TRUE)) %>%
+  ungroup(.) %>%
+  select(Sequence, Exposure, File, avg_exp_mass) %>%
+  mutate(source = "test") %>%
+  unique(.) %>%
+  arrange(File) %>%
   as.data.frame()
 
 agg_tmp_mass <- tmp_mass %>%
   group_by(Sequence, MaxUptake, MHP, Exposure) %>%
   summarise(pepMass = mean(aggMass, na.rm = TRUE),
-            # err_pepMass = coalesce(sd(aggMass, na.rm = TRUE), 0)) %>% ## do poprawy
-            err_pepMass = coalesce(sd(aggMass, na.rm = TRUE), 0)/4) %>% ## do poprawy
+            # err_pepMass = coalesce(sd(aggMass, na.rm = TRUE), 0)) %>% 
+            err_pepMass = coalesce(sd(aggMass, na.rm = TRUE), 0)/2) %>% ## tu jednak 2 bo to przecież pod pierwiastkiem!!!
   as.data.frame()
 
 agg_tmp_mass_old <- agg_tmp_mass
@@ -53,6 +64,9 @@ err_m_0 <- agg_tmp_mass[1, 6]
 err_m_t <- agg_tmp_mass[2, 6]
 err_m_100 <- agg_tmp_mass[3, 6]
 
+reference_table_mass <- data.frame(Sequence, m_0, err_m_0, m_t, err_m_t, m_100, err_m_100) %>%
+  mutate(source = "test")
+
 MaxUptake <- 11
 MHP <- unique(dat_tmp[["MHP"]])
 
@@ -61,10 +75,10 @@ err_deut_uptake <- sqrt(err_m_t^2 + err_m_0^2)
 
 frac_deut_uptake <- 100*(m_t - m_0)/(m_100 - m_0) # %
 max_up <- m_100 - m_0
-x_1 <- err_m_t/(max_up)
-x_2 <- (m_t - m_100)*err_m_0/(max_up^2)
-x_3 <- (m_0 - m_t)*err_m_100/(max_up^2)
-err_frac_deut_uptake <- 100*sqrt(x_1^2 + x_2^2 + x_3^2)
+x_1 <- (err_m_t/(max_up))
+x_2 <- ((m_t - m_100)*err_m_0/(max_up^2))
+x_3 <- ((m_0 - m_t)*err_m_100/(max_up^2))
+err_frac_deut_uptake <- 100*sqrt((err_m_t/(m_100 - m_0))^2 + ((m_t - m_100)*err_m_0/(m_100 - m_0^2))^2 + ((m_0 - m_t)*err_m_100/(m_100 - m_0^2))^2)
 
 theo_deut_uptake <- m_t - MHP
 err_theo_deut_uptake <- err_m_t
@@ -83,11 +97,11 @@ res_fun <- calculate_state_deuteration(dat,
                                        deut_part = 1) %>%
   select(-Protein, -Start, -End, -State, -Med_Sequence) %>%
   as.data.frame() %>%
-  mutate(source = "function")
-
+  mutate(source = "func")
 
 str(result)
 str(res_fun)
-bind_rows(result, res_fun)
 
-bind_rows(x_1, result, res_fun)
+reference_table_deut_uptake <- bind_rows(result, res_fun)
+
+# bind_rows(x_1, result, res_fun)
