@@ -54,13 +54,7 @@ dat %>%
   ## dotad ok
   # odtad nieok
   mutate(# experimental calculations below - fractional
-    tmp_licz = (m_t - m_0), 
-    tmp_mian =  (m_100 - m_0),
-    frac_tmp = tmp_licz/tmp_mian,
-    frac_deut_uptake = 100*(m_t - m_0)/(m_100 - m_0)) %>%
-  as.data.frame()
-  
-  #,
+    frac_deut_uptake = 100*(m_t - m_0)/(m_100 - m_0),
     err_frac_deut_uptake = 100*sqrt((err_m_t/(m_100 - m_0))^2 + ((m_t - m_100)*err_m_0/(m_100 - m_0^2))^2 + ((m_0 - m_t)*err_m_100/(m_100 - m_0^2))^2),
     # experimental calculations below - absolute
     deut_uptake = (m_t - m_0),
