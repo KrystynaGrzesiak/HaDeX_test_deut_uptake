@@ -80,12 +80,34 @@ show_differences <- function(dat,
   num_cl_1_diff_theo_deut_uptake_old <- sum(abs(woods_data_set_old[["diff_theo_deut_uptake"]] > cl_1_diff_theo_deut_uptake_old))
   num_cl_2_diff_theo_deut_uptake_old <- sum(abs(woods_data_set_old[["diff_theo_deut_uptake"]] > cl_2_diff_theo_deut_uptake_old))
   
-  data.frame(Exposure = time_t, CL = 0.98, cl_1_diff_frac_deut_uptake_old, cl_1_diff_frac_deut_uptake_new, cl_1_diff_deut_uptake_old, cl_1_diff_deut_uptake_new, cl_1_diff_theo_frac_deut_uptake_old, cl_1_diff_theo_frac_deut_uptake_new, cl_1_diff_theo_deut_uptake_old, cl_1_diff_theo_deut_uptake_new, num_cl_1_diff_frac_deut_uptake_old, num_cl_1_diff_frac_deut_uptake_new,  num_cl_1_diff_deut_uptake_old, num_cl_1_diff_deut_uptake_new, num_cl_1_diff_theo_frac_deut_uptake_old, num_cl_1_diff_theo_frac_deut_uptake_new, num_cl_1_diff_theo_deut_uptake_old, num_cl_1_diff_theo_deut_uptake_new)
+  data.frame(Exposure = time_t, CL = 0.98, cl_1_diff_frac_deut_uptake_old, cl_1_diff_frac_deut_uptake_new, cl_1_diff_deut_uptake_old, cl_1_diff_deut_uptake_new, cl_1_diff_theo_frac_deut_uptake_old, cl_1_diff_theo_frac_deut_uptake_new, cl_1_diff_theo_deut_uptake_old, cl_1_diff_theo_deut_uptake_new, num_cl_1_diff_frac_deut_uptake_old, num_cl_1_diff_frac_deut_uptake_new,  num_cl_1_diff_deut_uptake_old, num_cl_1_diff_deut_uptake_new, num_cl_1_diff_theo_frac_deut_uptake_old, num_cl_1_diff_theo_frac_deut_uptake_new, num_cl_1_diff_theo_deut_uptake_old, num_cl_1_diff_theo_deut_uptake_new, avg_err_diff_frac_deut_uptake_new, avg_err_diff_frac_deut_uptake_old, avg_err_diff_deut_uptake_new, avg_err_diff_deut_uptake_old, avg_err_diff_theo_frac_deut_uptake_new, avg_err_diff_theo_frac_deut_uptake_old,  avg_err_diff_theo_deut_uptake_new, avg_err_diff_theo_deut_uptake_old)
   
 }
 
+library(HaDeX)
+dat <- read_hdx(system.file(package = "HaDeX", "HaDeX/data/KD_180110_CD160_HVEM.csv"))
+
+time_0 <- 0.001
+time_100 <- 1440
 times <- unique(dat[["Exposure"]][dat[["Exposure"]] > time_0 & dat[["Exposure"]] < time_100])
 
-bind_rows(lapply(times, function(t){
+dat_all <- bind_rows(lapply(times, function(t){
   show_differences(dat, time_t = t)
 }))
+
+str(dat_all)
+
+## roznice w srednich bledach
+
+dat_all %>%
+  select(Exposure, avg_err_diff_frac_deut_uptake_new, avg_err_diff_frac_deut_uptake_old, avg_err_diff_deut_uptake_new, avg_err_diff_deut_uptake_old, avg_err_diff_theo_frac_deut_uptake_new, avg_err_diff_theo_frac_deut_uptake_old, avg_err_diff_theo_deut_uptake_new, avg_err_diff_theo_deut_uptake_old ) 
+
+## roznie w interwalach
+
+dat_all %>%
+  select(Exposure, CL, cl_1_diff_frac_deut_uptake_old, cl_1_diff_frac_deut_uptake_new, cl_1_diff_deut_uptake_old, cl_1_diff_deut_uptake_new, cl_1_diff_theo_frac_deut_uptake_old, cl_1_diff_theo_frac_deut_uptake_new, cl_1_diff_theo_deut_uptake_old, cl_1_diff_theo_deut_uptake_new)
+
+## roznice we wpadaniu w interwaly
+
+dat_all %>%
+  select(Exposure, CL, num_cl_1_diff_frac_deut_uptake_old, num_cl_1_diff_frac_deut_uptake_new, num_cl_1_diff_deut_uptake_old, num_cl_1_diff_deut_uptake_new, num_cl_1_diff_theo_frac_deut_uptake_old, num_cl_1_diff_theo_frac_deut_uptake_new, num_cl_1_diff_theo_deut_uptake_old, num_cl_1_diff_theo_deut_uptake_new)
