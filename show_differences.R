@@ -111,3 +111,4 @@ dat_all %>%
 
 dat_all %>%
   select(Exposure, CL, num_cl_1_diff_frac_deut_uptake_old, num_cl_1_diff_frac_deut_uptake_new, num_cl_1_diff_deut_uptake_old, num_cl_1_diff_deut_uptake_new, num_cl_1_diff_theo_frac_deut_uptake_old, num_cl_1_diff_theo_frac_deut_uptake_new, num_cl_1_diff_theo_deut_uptake_old, num_cl_1_diff_theo_deut_uptake_new)
+
