@@ -1,3 +1,8 @@
+## The function from HaDeX compared with reference values
+## The reference values were calculated by Krysia and Weronika 
+## during the meeting on 14/12/2020 - one can find them in 
+## ref_table.csv (for specific peptide in specific state)
+
 library(readr)
 library(HaDeX)
 library(dplyr)

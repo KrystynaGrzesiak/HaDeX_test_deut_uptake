@@ -1,3 +1,7 @@
+## here is the comparison of calculation methods - how 
+## the fix of calculate_state_deuteration changes the 
+## result. The changed functions are in hadex_functions_new.R
+
 show_differences(dat = dat,  time_t = 5)
 
 show_differences <- function(dat, 

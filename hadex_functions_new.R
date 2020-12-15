@@ -1,3 +1,7 @@
+## new versions of calculate_state_deuteration, with small
+## variations. this is used for comparison of methods - the 
+## results are in show_differences.R
+
 calculate_state_deuteration_new <- function(dat,
                                         protein, 
                                         state, 
