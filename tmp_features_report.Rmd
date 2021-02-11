@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = FALSE)
 library(HaDeX)
 library(dplyr)
 library(ggplot2)
+library(tidyr)
 
 dat <- read_hdx(system.file(package = "HaDeX", "HaDeX/data/KD_180110_CD160_HVEM.csv"))
 
@@ -81,6 +82,8 @@ Not entirely sure yet how this plot is produced. It looks like there is a p-valu
 
 Below there is an example vulcano plot from HDeXaminer (from their instructional video).
 ![Vulcano Plot example from HDeXaminer](maxresdefault.jpg)
+
+
 # My ideas for new features
 
 ## Woods plot to butterfly plot
@@ -242,3 +245,64 @@ kinetic_dat %>%
        y = "Fractional deuterium uptake [%]")
 
 ```
+
+
+## Prof suggests
+
+
+Additionally, there is an old idea from professor, to calculate mean intensity difference between states for peptide in given time point and for all time points combined.
+
+```{r}
+dat %>%
+  select(Sequence, State, Start, End, Exposure, Inten) %>%
+  group_by(Sequence, State, Start, Exposure, End) %>%
+  mutate(mean_inten = mean(Inten),
+         err_mean_inten = sd(Inten)) %>%
+  select(-Inten) %>%
+  arrange(Start) %>%
+  unique(.) %>%
+  gather(key = "type", 
+         value = "value", 
+         mean_inten:err_mean_inten) %>%
+  unite(col = "type",
+        State, type, sep = "_") %>%
+  spread(key = "type", 
+         value = "value") %>%
+  mutate(ratio = CD160_mean_inten / CD160_HVEM_mean_inten,
+         err_ratio = sqrt((CD160_err_mean_inten^2/(CD160_HVEM_mean_inten^2))^2 + ((CD160_mean_inten^2*CD160_HVEM_err_mean_inten^2)/(CD160_HVEM_mean_inten^4))^2),
+         Med_Sequence = (Start + End)/2) %>%
+  ggplot() + 
+    geom_segment(aes(x = Start, y = ratio, xend = End, yend = ratio, color = factor(Exposure))) +
+    labs(x = "Position in sequence",
+         y = "Intensivity in state_1 to state_2 ratio") + 
+    facet_wrap(Exposure ~ . )
+```
+
+And for all time points combined:
+
+```{r}
+dat %>%
+   select(Sequence, State, Start, End, Inten) %>%
+   group_by(Sequence, State, Start, End) %>%
+   mutate(mean_inten = mean(Inten),
+          err_mean_inten = sd(Inten)) %>%
+   select(-Inten) %>%
+   arrange(Start) %>%
+   unique(.) %>%
+   gather(key = "type", 
+          value = "value", 
+          mean_inten:err_mean_inten) %>%
+   unite(col = "type",
+         State, type, sep = "_") %>%
+   spread(key = "type", 
+          value = "value") %>%
+   mutate(ratio = CD160_mean_inten / CD160_HVEM_mean_inten,
+          err_ratio = sqrt((CD160_err_mean_inten^2/(CD160_HVEM_mean_inten^2))^2 + ((CD160_mean_inten^2*CD160_HVEM_err_mean_inten^2)/(CD160_HVEM_mean_inten^4))^2),
+          Med_Sequence = (Start + End)/2) %>%
+   ggplot() + 
+     geom_segment(aes(x = Start, y = ratio, xend = End, yend = ratio)) +
+     labs(x = "Position in sequence",
+          y = "Intensivity in state_1 to state_2 ratio") 
+         
+```
+
